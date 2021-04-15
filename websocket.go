@@ -39,10 +39,6 @@ func (ws *WebSocket) HandleMessage(stateChannel chan bool, connChannel chan *web
 
 func (ws *WebSocket) Listen(w http.ResponseWriter, request *http.Request) {
 	conn, _ := upgrader.Upgrade(w, request, nil)
-	if !upgrader.CheckOrigin(request) {
-		w.WriteHeader(404)
-		return
-	}
 	connChannel := make(chan *websocket.Conn)
 	msgChannel := make(chan []byte)
 	stateChannel := make(chan bool)
