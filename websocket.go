@@ -30,7 +30,8 @@ func (ws *WebSocket) HandleMessage(currentConn *websocket.Conn) {
 		case conn := <-ws.incommingConnections:
 			fmt.Println("New connection")
 			ws.connections = append(ws.connections, conn)
-		case <-ws.incommingMessages:
+		case msg := <-ws.incommingMessages:
+			PrintServerInfo("New message incomming. " + string(msg))
 			currentConn.WriteMessage(websocket.TextMessage, []byte("He recibido tu mensaje :)"))
 		}
 	}
@@ -42,7 +43,11 @@ func (ws *WebSocket) Listen(w http.ResponseWriter, request *http.Request) {
 	defer conn.Close()
 	ws.incommingConnections <- conn
 	for {
-		_, msg, _ := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			PrintServerInfo("Conexion de socket cerrada")
+			return
+		}
 		ws.incommingMessages <- msg
 	}
 }
