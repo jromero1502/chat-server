@@ -38,7 +38,12 @@ func (ws *WebSocket) HandleMessage(stateChannel chan bool, connChannel chan *web
 }
 
 func (ws *WebSocket) Listen(w http.ResponseWriter, request *http.Request) {
-	conn, _ := upgrader.Upgrade(w, request, nil)
+	conn, err := upgrader.Upgrade(w, request, nil)
+	if err != nil {
+		PrintServerInfo("There was an error on the upgrader")
+		PrintServerInfo(err.Error())
+		return
+	}
 	connChannel := make(chan *websocket.Conn)
 	msgChannel := make(chan []byte)
 	stateChannel := make(chan bool)
@@ -49,9 +54,9 @@ func (ws *WebSocket) Listen(w http.ResponseWriter, request *http.Request) {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			PrintServerInfo("Conexion de socket cerrada")
+			stateChannel <- false
 			return
 		}
 		msgChannel <- msg
 	}
-	stateChannel <- false
 }
