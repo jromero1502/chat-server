@@ -37,7 +37,12 @@ func (ws *WebSocket) HandleMessage(stateChannel chan bool, connChannel chan *web
 	}
 }
 
+func (ws *WebSocket) CheckOrigin(r *http.Request) bool {
+	return true
+}
+
 func (ws *WebSocket) Listen(w http.ResponseWriter, request *http.Request) {
+	upgrader.CheckOrigin = ws.CheckOrigin
 	conn, err := upgrader.Upgrade(w, request, nil)
 	if err != nil {
 		PrintServerInfo("There was an error on the upgrader")
